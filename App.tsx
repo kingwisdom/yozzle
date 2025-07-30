@@ -9,13 +9,13 @@ export default function App() {
     goBack: () => console.log('Back pressed'),
     canGoBack: () => false,
     replace: (screen: string, params: any) => console.log('Navigate to', screen, params),
-    dispatch: (action: any) => {},
-    navigate: (screen: string, params?: any) => {},
+    dispatch: (action: any) => { },
+    navigate: (screen: string, params?: any) => { },
     isFocused: () => true,
-    addListener: (type: any, listener: any) => { return () => {} },
-    removeListener: (type: any, listener: any) => {},
-    setParams: (params: any) => {},
-    setOptions: (options: any) => {},
+    addListener: (type: any, listener: any) => { return () => { } },
+    removeListener: (type: any, listener: any) => { },
+    setParams: (params: any) => { },
+    setOptions: (options: any) => { },
   };
 
   // Mock route object

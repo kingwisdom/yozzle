@@ -7,13 +7,13 @@ import {
   Alert,
   TouchableOpacity
 } from 'react-native';
-import WordGrid from '../../components/WordGrid';
-import WordList from '../../components/WordList';
-import Header from '../../components/Header';
-import { generateWordGrid } from '../../utils/wordSearchGenerator';
-import { highlightFoundWord } from '../../utils/wordHighlighter';
-import { getRandomWordsForGame, formatWordsForGame, getCategories } from '../../utils/wordDataLoader';
+import WordList from '../components/WordList';
+import Header from '../components/Header';
+import { generateWordGrid } from '../utils/wordSearchGenerator';
+import { highlightFoundWord } from '../utils/wordHighlighter';
+import { getRandomWordsForGame, formatWordsForGame, getCategories } from '../utils/wordDataLoader';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
+import WordGrid from '../components/WordGrid';
 
 interface GameData {
   words: string[];
@@ -123,7 +123,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ route, navigation }) => {
     }));
 
     categoryOptions.push({ text: 'Random', onPress: () => loadNewGame() });
-    categoryOptions.push({ text: 'Cancel', style: 'cancel' });
+    // categoryOptions.push({ text: 'Cancel', onPress:  });
 
     Alert.alert('Choose Category', 'Select a category to practice:', categoryOptions);
   };
@@ -161,7 +161,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ route, navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../../assets/background.jpg')}
+      source={require('../assets/background.jpg')}
       className="flex-1"
       resizeMode="cover"
     >

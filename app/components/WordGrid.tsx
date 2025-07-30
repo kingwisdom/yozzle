@@ -6,12 +6,12 @@ import {
   Dimensions,
   GestureResponderEvent,
 } from 'react-native';
-import { 
-  getSelectionPath, 
-  checkWordInSelection, 
-  getCellStyle, 
-  assignWordColor 
-} from '../../utils/wordHighlighter';
+import {
+  getSelectionPath,
+  checkWordInSelection,
+  getCellStyle,
+  assignWordColor
+} from '../utils/wordHighlighter';
 
 interface Cell {
   row: number;
@@ -37,10 +37,10 @@ const GRID_PADDING = 40;
 const MAX_GRID_WIDTH = screenWidth - GRID_PADDING;
 
 const WordGrid: React.FC<WordGridProps> = ({
-  grid, 
-  onWordFound, 
+  grid,
+  onWordFound,
   foundWords = [],
-  targetWords = [] 
+  targetWords = []
 }) => {
   const [selection, setSelection] = useState<Cell[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -54,7 +54,7 @@ const WordGrid: React.FC<WordGridProps> = ({
     const cellWithMargin = cellSize + 4;
     const row = Math.floor(y / cellWithMargin);
     const col = Math.floor(x / cellWithMargin);
-    
+
     if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
       return { row, col };
     }
@@ -68,7 +68,7 @@ const WordGrid: React.FC<WordGridProps> = ({
     onPanResponderGrant: (evt: GestureResponderEvent) => {
       const { locationX, locationY } = evt.nativeEvent;
       const cell = getCellFromPosition(locationX, locationY);
-      
+
       if (cell) {
         setStartCell(cell);
         setSelection([cell]);
@@ -81,11 +81,11 @@ const WordGrid: React.FC<WordGridProps> = ({
 
       const { locationX, locationY } = evt.nativeEvent;
       const currentCell = getCellFromPosition(locationX, locationY);
-      
+
       if (currentCell) {
         // Always calculate path from start to current position
         const path = getSelectionPath(startCell, currentCell);
-        
+
         // Only update selection if we have a valid path
         if (path.length > 0) {
           setSelection(path);
@@ -97,13 +97,13 @@ const WordGrid: React.FC<WordGridProps> = ({
       if (selection.length > 1) {
         // Check if the selection forms a valid word
         const foundWord = checkWordInSelection(grid, selection, targetWords);
-        
+
         if (foundWord && !foundWords.includes(foundWord.word)) {
           const color = assignWordColor(foundWords.length);
           onWordFound?.(foundWord.word, selection, color);
         }
       }
-      
+
       // Reset selection state
       setSelection([]);
       setIsSelecting(false);
@@ -117,7 +117,7 @@ const WordGrid: React.FC<WordGridProps> = ({
     const position = { row, col };
     const isSelected = selection.some(s => s.row === row && s.col === col);
     const cellStyle = getCellStyle(cell, position, selection, isSelecting);
-    
+
     return (
       <View
         key={`${row}-${col}`}

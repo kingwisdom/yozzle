@@ -1,7 +1,23 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, View, Text } from 'react-native';
+import { Animated, Text, ViewStyle, TextStyle } from 'react-native';
 
-const AnimatedCell = ({ 
+interface GridCell {
+  letter: string;
+  isFound: boolean;
+  wordId?: string;
+  highlightColor?: string;
+}
+
+interface AnimatedCellProps {
+  cell: GridCell;
+  cellSize: number;
+  isSelected: boolean;
+  isFound: boolean;
+  cellStyle: ViewStyle;
+  textStyle: TextStyle;
+}
+
+const AnimatedCell: React.FC<AnimatedCellProps> = ({
   cell, 
   cellSize, 
   isSelected, 
@@ -68,4 +84,3 @@ const AnimatedCell = ({
 };
 
 export default AnimatedCell;
-

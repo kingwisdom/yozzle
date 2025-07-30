@@ -1,7 +1,19 @@
 // Word highlighting and search utilities
 
-export const getSelectionPath = (startCell, endCell) => {
-  const path = [];
+interface Cell {
+  row: number;
+  col: number;
+}
+
+interface GridCell {
+  letter: string;
+  isFound: boolean;
+  wordId?: string;
+  highlightColor?: string;
+}
+
+export const getSelectionPath = (startCell: Cell, endCell: Cell): Cell[] => {
+  const path: Cell[] = [];
   const rowDiff = endCell.row - startCell.row;
   const colDiff = endCell.col - startCell.col;
 
@@ -31,7 +43,7 @@ export const getSelectionPath = (startCell, endCell) => {
   return path;
 };
 
-export const checkWordInSelection = (grid, selection, targetWords) => {
+export const checkWordInSelection = (grid: GridCell[][], selection: Cell[], targetWords: string[]): { word: string; isReversed: boolean; positions: Cell[] } | null => {
   if (selection.length < 2) return null;
   
   // Get letters from selection
@@ -52,7 +64,7 @@ export const checkWordInSelection = (grid, selection, targetWords) => {
   return null;
 };
 
-export const getWordColors = () => {
+export const getWordColors = (): string[] => {
   return [
     '#4A90E2', // Blue
     '#F5A623', // Orange
@@ -65,12 +77,12 @@ export const getWordColors = () => {
   ];
 };
 
-export const assignWordColor = (wordIndex) => {
+export const assignWordColor = (wordIndex: number): string => {
   const colors = getWordColors();
   return colors[wordIndex % colors.length];
 };
 
-export const highlightFoundWord = (grid, positions, wordId, color) => {
+export const highlightFoundWord = (grid: GridCell[][], positions: Cell[], wordId: string, color: string): GridCell[][] => {
   const newGrid = [...grid];
   
   positions.forEach(pos => {
@@ -85,11 +97,11 @@ export const highlightFoundWord = (grid, positions, wordId, color) => {
   return newGrid;
 };
 
-export const isPositionInSelection = (position, selection) => {
+export const isPositionInSelection = (position: Cell, selection: Cell[]): boolean => {
   return selection.some(cell => cell.row === position.row && cell.col === position.col);
 };
 
-export const getCellStyle = (cell, position, selection, isSelecting) => {
+export const getCellStyle = (cell: GridCell, position: Cell, selection: Cell[], isSelecting: boolean): { backgroundColor: string; borderColor: string } => {
   const baseStyle = {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderColor: '#ddd',
@@ -116,7 +128,7 @@ export const getCellStyle = (cell, position, selection, isSelecting) => {
   return baseStyle;
 };
 
-export const validateSelection = (selection) => {
+export const validateSelection = (selection: Cell[]): boolean => {
   if (selection.length < 2) return false;
   
   const first = selection[0];
@@ -146,4 +158,3 @@ export const validateSelection = (selection) => {
   
   return true;
 };
-

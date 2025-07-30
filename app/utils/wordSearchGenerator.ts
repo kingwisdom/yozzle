@@ -1,11 +1,35 @@
 // Word search grid generation utilities - Optimized for 5x5 grid
 
-export const generateWordGrid = (words, gridSize = 5) => {
+interface GridCell {
+  letter: string;
+  isFound: boolean;
+  wordId: string | null;
+  isPlaced: boolean;
+}
+
+interface Position {
+  row: number;
+  col: number;
+}
+
+interface Direction {
+  row: number;
+  col: number;
+}
+
+interface PlacedWord {
+  word: string;
+  startPos: Position;
+  direction: Direction;
+  positions: Position[];
+}
+
+export const generateWordGrid = (words: string[], gridSize: number = 5): GridCell[][] => {
   // Force 5x5 grid size
   const FIXED_GRID_SIZE = 5;
   
   // Initialize empty grid
-  const grid = Array(FIXED_GRID_SIZE).fill(null).map(() => 
+  const grid: GridCell[][] = Array(FIXED_GRID_SIZE).fill(null).map(() =>
     Array(FIXED_GRID_SIZE).fill(null).map(() => ({
       letter: '',
       isFound: false,
@@ -14,7 +38,7 @@ export const generateWordGrid = (words, gridSize = 5) => {
     }))
   );
 
-  const placedWords = [];
+  const placedWords: PlacedWord[] = [];
   
   // Filter words to fit in 5x5 grid (max 5 characters)
   const validWords = words.filter(word => word.length <= FIXED_GRID_SIZE);
@@ -49,8 +73,8 @@ export const generateWordGrid = (words, gridSize = 5) => {
   return grid;
 };
 
-const getRandomDirection = () => {
-  const directions = [
+const getRandomDirection = (): Direction => {
+  const directions: Direction[] = [
     { row: 0, col: 1 },   // horizontal
     { row: 1, col: 0 },   // vertical
     { row: 1, col: 1 },   // diagonal down-right
@@ -63,7 +87,7 @@ const getRandomDirection = () => {
   return directions[Math.floor(Math.random() * directions.length)];
 };
 
-const getRandomStartPosition = (word, gridSize, direction) => {
+const getRandomStartPosition = (word: string, gridSize: number, direction: Direction): Position => {
   const wordLength = word.length;
   
   // Calculate valid start positions based on direction
@@ -94,7 +118,7 @@ const getRandomStartPosition = (word, gridSize, direction) => {
   };
 };
 
-const canPlaceWord = (grid, word, startPos, direction) => {
+const canPlaceWord = (grid: GridCell[][], word: string, startPos: Position, direction: Direction): boolean => {
   for (let i = 0; i < word.length; i++) {
     const row = startPos.row + (direction.row * i);
     const col = startPos.col + (direction.col * i);
@@ -113,7 +137,7 @@ const canPlaceWord = (grid, word, startPos, direction) => {
   return true;
 };
 
-const placeWord = (grid, word, startPos, direction) => {
+const placeWord = (grid: GridCell[][], word: string, startPos: Position, direction: Direction): void => {
   for (let i = 0; i < word.length; i++) {
     const row = startPos.row + (direction.row * i);
     const col = startPos.col + (direction.col * i);
@@ -127,8 +151,8 @@ const placeWord = (grid, word, startPos, direction) => {
   }
 };
 
-const getWordPositions = (word, startPos, direction) => {
-  const positions = [];
+const getWordPositions = (word: string, startPos: Position, direction: Direction): Position[] => {
+  const positions: Position[] = [];
   for (let i = 0; i < word.length; i++) {
     positions.push({
       row: startPos.row + (direction.row * i),
@@ -138,7 +162,7 @@ const getWordPositions = (word, startPos, direction) => {
   return positions;
 };
 
-const fillEmptyCells = (grid) => {
+const fillEmptyCells = (grid: GridCell[][]): void => {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   
   for (let row = 0; row < grid.length; row++) {
@@ -156,7 +180,7 @@ const fillEmptyCells = (grid) => {
 };
 
 // Helper function to check if a selection forms a valid line
-export const isValidSelection = (cells) => {
+export const isValidSelection = (cells: Position[]): boolean => {
   if (cells.length < 2) return false;
   
   const first = cells[0];
@@ -166,7 +190,7 @@ export const isValidSelection = (cells) => {
   const colDiff = second.col - first.col;
   
   // Normalize direction
-  const direction = {
+  const direction: Direction = {
     row: rowDiff === 0 ? 0 : rowDiff / Math.abs(rowDiff),
     col: colDiff === 0 ? 0 : colDiff / Math.abs(colDiff)
   };
@@ -183,4 +207,3 @@ export const isValidSelection = (cells) => {
   
   return true;
 };
-

@@ -2,37 +2,55 @@ import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   PanResponder,
   Dimensions,
+  GestureResponderEvent,
 } from 'react-native';
 import { 
   getSelectionPath, 
   checkWordInSelection, 
   getCellStyle, 
-  validateSelection,
   assignWordColor 
-} from '../utils/wordHighlighter';
+} from '../../utils/wordHighlighter';
+
+interface Cell {
+  row: number;
+  col: number;
+}
+
+interface GridCell {
+  letter: string;
+  isFound: boolean;
+  wordId?: string;
+  highlightColor?: string;
+}
+
+interface WordGridProps {
+  grid: GridCell[][];
+  onWordFound: (word: string, positions: Cell[], color: string) => void;
+  foundWords: string[];
+  targetWords: string[];
+}
 
 const { width: screenWidth } = Dimensions.get('window');
 const GRID_PADDING = 40;
 const MAX_GRID_WIDTH = screenWidth - GRID_PADDING;
 
-const WordGrid = ({ 
+const WordGrid: React.FC<WordGridProps> = ({
   grid, 
   onWordFound, 
   foundWords = [],
   targetWords = [] 
 }) => {
-  const [selection, setSelection] = useState([]);
+  const [selection, setSelection] = useState<Cell[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [startCell, setStartCell] = useState(null);
-  const gridRef = useRef(null);
+  const [startCell, setStartCell] = useState<Cell | null>(null);
+  const gridRef = useRef<View>(null);
 
   const gridSize = grid.length;
   const cellSize = Math.floor(MAX_GRID_WIDTH / gridSize) - 4;
 
-  const getCellFromPosition = (x, y) => {
+  const getCellFromPosition = (x: number, y: number): Cell | null => {
     const cellWithMargin = cellSize + 4;
     const row = Math.floor(y / cellWithMargin);
     const col = Math.floor(x / cellWithMargin);
@@ -47,7 +65,7 @@ const WordGrid = ({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true,
 
-    onPanResponderGrant: (evt) => {
+    onPanResponderGrant: (evt: GestureResponderEvent) => {
       const { locationX, locationY } = evt.nativeEvent;
       const cell = getCellFromPosition(locationX, locationY);
       
@@ -58,7 +76,7 @@ const WordGrid = ({
       }
     },
 
-    onPanResponderMove: (evt) => {
+    onPanResponderMove: (evt: GestureResponderEvent) => {
       if (!isSelecting || !startCell) return;
 
       const { locationX, locationY } = evt.nativeEvent;
@@ -95,7 +113,7 @@ const WordGrid = ({
     onPanResponderTerminationRequest: () => false,
   });
 
-  const renderCell = (cell, row, col) => {
+  const renderCell = (cell: GridCell, row: number, col: number) => {
     const position = { row, col };
     const isSelected = selection.some(s => s.row === row && s.col === col);
     const cellStyle = getCellStyle(cell, position, selection, isSelecting);
@@ -103,23 +121,17 @@ const WordGrid = ({
     return (
       <View
         key={`${row}-${col}`}
-        style={[
-          styles.cell,
-          {
-            width: cellSize,
-            height: cellSize,
-            backgroundColor: cellStyle.backgroundColor,
-            borderColor: cellStyle.borderColor,
-          },
-          isSelected && styles.selectedCell,
-          cell.isFound && styles.foundCell,
-        ]}
+        style={{
+          width: cellSize,
+          height: cellSize,
+          backgroundColor: cellStyle.backgroundColor,
+          borderColor: cellStyle.borderColor,
+        }}
+        className={`m-0.5 border rounded-lg justify-center items-center bg-white/90 border-gray-300
+          ${isSelected && 'bg-yellow-300/70 border-yellow-400 border-2 scale-105'}
+          ${cell.isFound && 'border-2'}`}
       >
-        <Text style={[
-          styles.cellText,
-          { fontSize: Math.max(cellSize * 0.5, 14) },
-          cell.isFound && styles.foundCellText
-        ]}>
+        <Text style={{ fontSize: Math.max(cellSize * 0.5, 14) }} className={`font-bold text-gray-800 text-center ${cell.isFound && 'text-white font-bold'}`}>
           {cell.letter}
         </Text>
       </View>
@@ -127,14 +139,15 @@ const WordGrid = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View className="items-center justify-center">
       <View
         ref={gridRef}
-        style={[styles.grid, { width: MAX_GRID_WIDTH, height: MAX_GRID_WIDTH }]}
+        style={{ width: MAX_GRID_WIDTH, height: MAX_GRID_WIDTH }}
+        className="bg-white/95 rounded-2xl p-2.5 shadow-lg"
         {...panResponder.panHandlers}
       >
         {grid.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.row}>
+          <View key={rowIndex} className="flex-row justify-center">
             {row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex))}
           </View>
         ))}
@@ -143,56 +156,4 @@ const WordGrid = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  grid: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 15,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  cell: {
-    margin: 2, // Increased margin for better touch
-    borderWidth: 1,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderColor: '#ddd',
-  },
-  selectedCell: {
-    backgroundColor: 'rgba(255, 255, 0, 0.7)',
-    borderColor: '#FFD700',
-    borderWidth: 2,
-    transform: [{ scale: 1.05 }], // Slight scale for visual feedback
-  },
-  foundCell: {
-    borderWidth: 2,
-  },
-  cellText: {
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-  },
-  foundCellText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
-
 export default WordGrid;
-

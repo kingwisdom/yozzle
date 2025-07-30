@@ -1,7 +1,16 @@
 // Dynamic word data loading utility for Yoruba language learning
 
+interface Word {
+  yoruba: string;
+  english: string;
+}
+
+interface Categories {
+  [key: string]: Word[];
+}
+
 // Yoruba words with English meanings for the word search game
-const yorubaWordsDatabase = [
+const yorubaWordsDatabase: Word[] = [
   { yoruba: "ILE", english: "house" },
   { yoruba: "OMI", english: "water" },
   { yoruba: "OJO", english: "day" },
@@ -35,7 +44,7 @@ const yorubaWordsDatabase = [
 ];
 
 // Categories for themed learning
-const categories = {
+const categories: Categories = {
   body: [
     { yoruba: "ORI", english: "head" },
     { yoruba: "ESE", english: "foot" },
@@ -83,9 +92,9 @@ const categories = {
  * @param {string} source - 'database', 'json', 'api', or 'category'
  * @param {string} category - Category name for filtered loading
  * @param {number} count - Number of words to return
- * @returns {Promise<Array>} Array of word objects with yoruba and english properties
+ * @returns {Promise<Word[]>} Array of word objects with yoruba and english properties
  */
-export const loadWords = async (source = 'database', category = null, count = 6) => {
+export const loadWords = async (source: string = 'database', category: string | null = null, count: number = 6): Promise<Word[]> => {
   try {
     switch (source) {
       case 'database':
@@ -113,7 +122,7 @@ export const loadWords = async (source = 'database', category = null, count = 6)
 /**
  * Load words from the built-in database
  */
-const loadFromDatabase = (category, count) => {
+const loadFromDatabase = (category: string | null, count: number): Word[] => {
   let sourceWords = category && categories[category] 
     ? categories[category] 
     : yorubaWordsDatabase;
@@ -129,7 +138,7 @@ const loadFromDatabase = (category, count) => {
 /**
  * Load words from a JSON file or object
  */
-const loadFromJSON = async (category, count) => {
+const loadFromJSON = async (category: string | null, count: number): Promise<Word[]> => {
   // This would typically load from a JSON file
   // For now, we'll simulate with the database
   const jsonData = {
@@ -149,7 +158,7 @@ const loadFromJSON = async (category, count) => {
 /**
  * Load words from an external API
  */
-const loadFromAPI = async (category, count) => {
+const loadFromAPI = async (category: string | null, count: number): Promise<Word[]> => {
   try {
     // Simulate API call - in real implementation, this would be an actual API
     // For now, return database words with a delay to simulate network request
@@ -171,7 +180,7 @@ const loadFromAPI = async (category, count) => {
 /**
  * Load words from a specific category
  */
-const loadFromCategory = (category, count) => {
+const loadFromCategory = (category: string | null, count: number): Word[] => {
   if (!category || !categories[category]) {
     return loadFromDatabase(null, count);
   }
@@ -185,7 +194,7 @@ const loadFromCategory = (category, count) => {
 /**
  * Get available categories
  */
-export const getCategories = () => {
+export const getCategories = (): string[] => {
   return Object.keys(categories);
 };
 
@@ -193,9 +202,9 @@ export const getCategories = () => {
  * Get random words for a new game
  * @param {number} count - Number of words to return
  * @param {string} category - Optional category filter
- * @returns {Promise<Array>} Array of word objects
+ * @returns {Promise<Word[]>} Array of word objects
  */
-export const getRandomWordsForGame = async (count = 6, category = null) => {
+export const getRandomWordsForGame = async (count: number = 6, category: string | null = null): Promise<Word[]> => {
   // Randomly choose a source for variety
   const sources = ['database', 'category'];
   const randomSource = sources[Math.floor(Math.random() * sources.length)];
@@ -208,10 +217,10 @@ export const getRandomWordsForGame = async (count = 6, category = null) => {
 
 /**
  * Convert word objects to the format expected by the game
- * @param {Array} wordObjects - Array of {yoruba, english} objects
- * @returns {Object} Object with words array and display info
+ * @param {Word[]} wordObjects - Array of {yoruba, english} objects
+ * @returns {{words: string[], displayWords: {word: string, meaning: string, display: string}[]}} Object with words array and display info
  */
-export const formatWordsForGame = (wordObjects) => {
+export const formatWordsForGame = (wordObjects: Word[]): { words: string[], displayWords: { word: string, meaning: string, display: string }[] } => {
   return {
     words: wordObjects.map(w => w.yoruba),
     displayWords: wordObjects.map(w => ({
@@ -221,4 +230,3 @@ export const formatWordsForGame = (wordObjects) => {
     }))
   };
 };
-

@@ -2,28 +2,49 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   ImageBackground,
   Alert,
   TouchableOpacity
 } from 'react-native';
-import WordGrid from '../components/WordGrid';
-import WordList from '../components/WordList';
-import Header from '../components/Header';
-import { generateWordGrid } from '../utils/wordSearchGenerator';
-import { highlightFoundWord } from '../utils/wordHighlighter';
-import { getRandomWordsForGame, formatWordsForGame, getCategories } from '../utils/wordDataLoader';
+import WordGrid from '../../components/WordGrid';
+import WordList from '../../components/WordList';
+import Header from '../../components/Header';
+import { generateWordGrid } from '../../utils/wordSearchGenerator';
+import { highlightFoundWord } from '../../utils/wordHighlighter';
+import { getRandomWordsForGame, formatWordsForGame, getCategories } from '../../utils/wordDataLoader';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 
-const GameScreen = ({ route, navigation }) => {
-  const [gameData, setGameData] = useState(null);
-  const [grid, setGrid] = useState([]);
-  const [foundWords, setFoundWords] = useState([]);
+interface GameData {
+  words: string[];
+  displayWords: {
+    word: string;
+    meaning: string;
+    display: string;
+  }[];
+}
+
+interface GridCell {
+  letter: string;
+  isFound: boolean;
+  wordId?: string;
+  highlightColor?: string;
+}
+
+interface GameScreenProps {
+  route: RouteProp<{ params: { levelId: number } }, 'params'>;
+  navigation: NavigationProp<any>;
+}
+
+const GameScreen: React.FC<GameScreenProps> = ({ route, navigation }) => {
+  const [gameData, setGameData] = useState<GameData | null>(null);
+  const [grid, setGrid] = useState<GridCell[][]>([]);
+  const [foundWords, setFoundWords] = useState<string[]>([]);
   const [hints, setHints] = useState(6);
   const [currentCategory, setCurrentCategory] = useState('general');
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadNewGame = async (category = null) => {
+  const loadNewGame = async (category: string | null = null) => {
     setIsLoading(true);
     try {
       // Get random Yoruba words
@@ -34,7 +55,7 @@ const GameScreen = ({ route, navigation }) => {
       const generatedGrid = generateWordGrid(formattedData.words);
 
       setGameData(formattedData);
-      setGrid(generatedGrid);
+      setGrid(generatedGrid as any);
       setFoundWords([]);
       setHints(6);
 
@@ -53,7 +74,7 @@ const GameScreen = ({ route, navigation }) => {
     loadNewGame();
   }, []);
 
-  const handleWordFound = (word, positions, color) => {
+  const handleWordFound = (word: string, positions: { row: number, col: number }[], color: string) => {
     setFoundWords(prev => [...prev, word]);
     const newGrid = highlightFoundWord(grid, positions, word, color);
     setGrid(newGrid);
@@ -132,19 +153,19 @@ const GameScreen = ({ route, navigation }) => {
 
   if (isLoading || !gameData || grid.length === 0) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading Yoruba words...</Text>
+      <SafeAreaView className="flex-1 justify-center items-center bg-black">
+        <Text className="text-white text-lg">Loading Yoruba words...</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <ImageBackground
-      source={require('../assets/background.jpg')}
-      style={styles.backgroundImage}
+      source={require('../../assets/background.jpg')}
+      className="flex-1"
       resizeMode="cover"
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView className="flex-1 bg-black/30">
         <Header
           level={{ id: 1, title: `Yoruba - ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}` }}
           hints={hints}
@@ -153,7 +174,7 @@ const GameScreen = ({ route, navigation }) => {
           onSettings={handleSettings}
         />
 
-        <View style={styles.gameArea}>
+        <View className="flex-1 justify-center items-center px-5">
           <WordGrid
             grid={grid}
             onWordFound={handleWordFound}
@@ -167,12 +188,12 @@ const GameScreen = ({ route, navigation }) => {
           foundWords={foundWords}
         />
 
-        <View style={styles.bottomControls}>
-          <TouchableOpacity style={styles.newGameButton} onPress={() => loadNewGame()}>
-            <Text style={styles.buttonText}>New Game</Text>
+        <View className="flex-row justify-around px-5 mb-6 py-2.5 bg-black/30">
+          <TouchableOpacity className="bg-green-500/80 px-5 py-2.5 rounded-full border border-white/30" onPress={() => loadNewGame()}>
+            <Text className="text-white text-sm font-bold text-center shadow">New Game</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.categoryButton} onPress={showCategorySelection}>
-            <Text style={styles.buttonText}>Category</Text>
+          <TouchableOpacity className="bg-blue-500/80 px-5 py-2.5 rounded-full border border-white/30" onPress={showCategorySelection}>
+            <Text className="text-white text-sm font-bold text-center shadow">Category</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -180,64 +201,4 @@ const GameScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  loadingText: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  gameArea: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  bottomControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    marginBottom: 25,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  newGameButton: {
-    backgroundColor: 'rgba(76, 175, 80, 0.8)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  categoryButton: {
-    backgroundColor: 'rgba(33, 150, 243, 0.8)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-});
-
 export default GameScreen;
-

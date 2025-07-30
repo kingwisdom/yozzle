@@ -20,11 +20,10 @@
         "foregroundImage": "./app/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.kingwisdom.WordSearchGame"
+      "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./app/assets/favicon.png"
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
